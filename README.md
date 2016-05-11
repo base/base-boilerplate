@@ -31,7 +31,7 @@ $ git clone https://github.com/h5bp/html5-boilerplate.git vendor/h5bp
 
 **Configuration**
 
-Specify file paths or glob patterns for source files in h5bp, and define any other options that will be necessary for generating the boilerplate.
+The following examples returns a normalized configuration object that includes every file in the [html5-boilerplate](https://github.com/h5bp/html5-boilerplate) project, organized exactly the way the project itself is organized.
 
 ```js
 var Boilerplate = require('boilerplate');
@@ -51,7 +51,7 @@ var boilerplate = new Boilerplate({
 
 **Generate**
 
-Pass the configuration to the `.boilerplate` or `.boilerplateStream` method to build the boilerplate.
+Pass the configuration to the `.boilerplate` or `.boilerplateStream` method to "build" the boilerplate. In this example we're not doing any additional processing, so the source files will simply be copied to the specified destination directories.
 
 ```js
 // stream
