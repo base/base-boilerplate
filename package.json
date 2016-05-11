@@ -19,22 +19,51 @@
   "scripts": {
     "test": "mocha"
   },
-  "dependencies": {},
+  "dependencies": {
+    "async": "^1.5.2",
+    "base-pipeline": "^0.2.5",
+    "base-plugins": "^0.4.10",
+    "base-scaffold": "^0.1.0",
+    "debug": "^2.2.0",
+    "is-boilerplate": "^0.1.1",
+    "merge-stream": "^1.0.0"
+  },
   "devDependencies": {
+    "base": "^0.8.1",
+    "base-app": "^0.2.1",
+    "base-fs": "^0.3.1",
+    "base-option": "^0.7.0",
+    "boilerplate": "^0.4.2",
     "gulp-format-md": "*",
-    "mocha": "^2.4.5"
+    "mocha": "^2.4.5",
+    "rimraf": "^2.5.2",
+    "scaffold": "^0.2.6",
+    "through2": "^2.0.1"
   },
   "keywords": [],
   "verb": {
+    "toc": false,
     "layout": "default",
+    "tasks": [
+      "readme"
+    ],
     "plugins": [
       "gulp-format-md"
     ],
     "related": {
-      "list": []
+      "list": [
+        "base-scaffold",
+        "base",
+        "base-generators",
+        "base-task"
+      ]
     },
     "reflinks": [
+      "boilerplate",
       "verb"
-    ]
+    ],
+    "lint": {
+      "reflinks": true
+    }
   }
 }
