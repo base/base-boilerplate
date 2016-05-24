@@ -7,26 +7,21 @@
 
 'use strict';
 
-var async = require('async');
 var debug = require('debug')('base-boilerplate');
-var isBoilerplate = require('is-boilerplate');
-var pipeline = require('base-pipeline');
-var scaffold = require('base-scaffold');
-var plugins = require('base-plugins');
-var ms = require('merge-stream');
+var utils = require('./utils');
 
 module.exports = function(config) {
   return function(app) {
-    if (!this.isApp || this.isRegistered('base-boilerplate')) return;
+    if (!utils.isValid(app)) return;
     debug('initializing "%s", from "%s"', __filename, module.parent.id);
 
     /**
      * Register plugins
      */
 
-    this.use(pipeline());
-    this.use(scaffold());
-    this.use(plugins());
+    this.use(utils.pipeline());
+    this.use(utils.scaffold());
+    this.use(utils.plugins());
 
     /**
      * Generate files from a declarative [boilerplate][] configuration and return a stream.
@@ -54,7 +49,7 @@ module.exports = function(config) {
      */
 
     this.define('boilerplate', function(boilerplate, options, cb) {
-      if (!isBoilerplate(boilerplate)) {
+      if (!utils.isBoilerplate(boilerplate)) {
         throw new Error('expected an instance of Boilerplate');
       }
 
@@ -70,8 +65,10 @@ module.exports = function(config) {
       this.run(boilerplate);
       var scaffolds = boilerplate.scaffolds;
       var targets = boilerplate.targets;
+      var keys = Object.keys(targets);
 
-      async.eachOf(targets, function(target, name, next) {
+      utils.eachSeries(keys, function(key, next) {
+        var target = targets[key];
         boilerplate.run(target);
         if (!target.files) {
           next();
@@ -80,7 +77,9 @@ module.exports = function(config) {
         app.each(target, options, next);
       }, function(err) {
         if (err) return cb(err);
-        async.eachOf(scaffolds, function(scaffold, name, next) {
+        keys = Object.keys(scaffolds);
+        utils.eachSeries(keys, function(key, next) {
+          var scaffold = scaffolds[key];
           boilerplate.run(scaffold);
           app.scaffold(scaffold, options, next);
         }, cb);
@@ -115,7 +114,7 @@ module.exports = function(config) {
      */
 
     this.define('boilerplateStream', function(boilerplate, options) {
-      if (!isBoilerplate(boilerplate)) {
+      if (!utils.isBoilerplate(boilerplate)) {
         throw new Error('expected an instance of Boilerplate');
       }
 
@@ -139,10 +138,9 @@ module.exports = function(config) {
         streams.push(this.scaffoldStream(scaffold, options));
       }
 
-      var stream = ms.apply(ms, streams);
+      var stream = utils.ms.apply(utils.ms, streams);
       stream.on('finish', stream.emit.bind(stream, 'end'));
       return stream;
     });
-
   };
 };
