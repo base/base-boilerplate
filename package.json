@@ -1,7 +1,7 @@
 {
   "name": "base-boilerplate",
   "description": "Plugin that adds support for generating project files from a declarative boilerplate configuration.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/node-base/base-boilerplate",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "node-base/base-boilerplate",
