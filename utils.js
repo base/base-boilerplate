@@ -12,24 +12,16 @@ require('async-each-series', 'eachSeries');
 require('base-pipeline', 'pipeline');
 require('base-plugins', 'plugins');
 require('base-scaffold', 'scaffold');
+require('boilerplate', 'Boilerplate');
 require('is-boilerplate');
-require('is-registered');
-require('is-valid-instance');
+require('is-valid-app', 'isValid');
+require('kind-of', 'typeOf');
+require('mixin-deep', 'merge');
 require('merge-stream', 'ms');
 require = fn;
 
-/**
- * Utils
- */
-
-utils.isValid = function(app, prop) {
-  if (!utils.isValidInstance(app)) {
-    return false;
-  }
-  if (utils.isRegistered(app, 'base-boilerplate')) {
-    return false;
-  }
-  return true;
+utils.isObject = function(val) {
+  return utils.typeOf(val) === 'object';
 };
 
 /**
