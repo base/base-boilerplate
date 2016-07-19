@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "base-app": "^0.2.6",
-    "boilerplate": "^0.5.3",
+    "boilerplate": "^0.6.0",
     "gulp-format-md": "^0.1.9",
     "mocha": "^2.5.3"
   },
