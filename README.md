@@ -7,7 +7,7 @@ Plugin that adds support for generating project files from a declarative boilerp
 Install with [npm](https://www.npmjs.com/):
 
 ```sh
-$ npm install base-boilerplate --save
+$ npm install --save base-boilerplate
 ```
 
 ## Usage
@@ -69,92 +69,134 @@ app.boilerplate(boilerplate, function(err) {
 
 ## API
 
-### [.boilerplate](index.js#L51)
+### [.boilerplate](index.js#L64)
 
-Generate files from a declarative [boilerplate](http://boilerplates.io) configuration and return a stream.
+Get boilerplate `name` from `app.boilerplates`, or set boilerplate `name` with the given `config`.
 
 **Params**
 
-* `boilerplate` **{Object}**: Scaffold configuration object.
-* `cb` **{Function}**: Optional callback function. If not passed, `.boilerplateStream` will be called and a stream will be returned.
+* `name` **{String|Object|Function}**
+* `config` **{Object|Fucntion}**
+* `returns` **{Object}**: Returns the app instance when setting a boilerplate, or the boilerplate instance when getting a boilerplate.
 
 **Example**
 
 ```js
-var Scaffold = require('boilerplate');
-var boilerplate = new Scaffold({
-  options: {cwd: 'source'},
-  posts: {
-    src: ['content/*.md']
-  },
-  pages: {
-    src: ['templates/*.hbs']
+app.boilerplate('foo', {
+  docs: {
+    options: {},
+    files: {
+      src: ['*'],
+      dest: 'foo'
+    }
   }
 });
 
-app.boilerplate(boilerplate, function(err) {
-  if (err) console.log(err);
-});
+// or
+var boilerplate = app.boilerplate('foo');
 ```
-
-### [.boilerplateStream](index.js#L116)
-
-Generate files from a declarative [boilerplate](http://boilerplates.io) configuration.
 
 **Params**
 
-* `boilerplate` **{Object}**: [boilerplate](http://boilerplates.io) configuration object.
-* `returns` **{Stream}**: returns a stream with all processed files.
+* `name` **{String}**
+* `config` **{Object|Function}**
 
 **Example**
 
 ```js
-var Scaffold = require('boilerplate');
-var boilerplate = new Scaffold({
-  options: {cwd: 'source'},
-  posts: {
-    src: ['content/*.md']
-  },
-  pages: {
-    src: ['templates/*.hbs']
+app.addBoilerplate('foo', {
+  docs: {
+    options: {},
+    files: {
+      src: ['*'],
+      dest: 'foo'
+    }
   }
 });
-
-app.boilerplateStream(boilerplate)
-  .on('error', console.error)
-  .on('end', function() {
-    console.log('done!');
-  });
 ```
 
-## Related projects
+**Params**
 
-You might also be interested in these projects:
+* `name` **{String}**
+* `options` **{Object}**
 
-* [base-generators](https://www.npmjs.com/package/base-generators): Adds project-generator support to your `base` application. | [homepage](https://github.com/node-base/base-generators)
-* [base-scaffold](https://www.npmjs.com/package/base-scaffold): Base plugin that adds support for generating files from a declarative scaffold configuration. | [homepage](https://github.com/node-base/base-scaffold)
-* [base-task](https://www.npmjs.com/package/base-task): base plugin that provides a very thin wrapper around [https://github.com/doowb/composer](https://github.com/doowb/composer) for adding task methods to… [more](https://www.npmjs.com/package/base-task) | [homepage](https://github.com/node-base/base-task)
-* [base](https://www.npmjs.com/package/base): base is the foundation for creating modular, unit testable and highly pluggable node.js applications, starting… [more](https://www.npmjs.com/package/base) | [homepage](https://github.com/node-base/base)
+**Example**
 
-## Contributing
+```js
+var boilerplate = app.getBoilerplate('foo');
 
-Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/node-base/base-boilerplate/issues/new).
+// or create an instance of `Boilerplate` using the given object
+var boilerplate = app.getBoilerplate({
+  docs: {
+    options: {},
+    files: {
+      src: ['*'],
+      dest: 'foo'
+    }
+  }
+});
+```
 
-## Building docs
+### [`.isBoilerplate](index.js#L215)
 
-Generate readme and API documentation with [verb](https://github.com/verbose/verb):
+Returns true if the given value is a valid [Boilerplate](https://github.com/jonschlinkert/boilerplate).
+
+**Params**
+
+* `val` **{any}**
+* `returns` **{Boolean}**
+
+**Example**
+
+```js
+isBoilerplate('a');
+//=> false
+isBoilerplate({});
+//=> false
+isBoilerplate({ files: [] })
+//=> false
+isBoilerplate(new Boilerplate({ src: ['*.js'] }))
+//=> true
+```
+
+### [Boilerplate](index.js#L232)
+
+Get or set the `Boilerplate` constructor. Exposed as a getter/setter to allow it to be customized before or after instantiation.
+
+**Example**
+
+```js
+// set
+app.Boilerplate = function MyBoilerplateCtor() {};
+
+// get
+var scaffold = new app.Boilerplate();
+```
+
+## About
+
+### Related projects
+
+* [base-generators](https://www.npmjs.com/package/base-generators): Adds project-generator support to your `base` application. | [homepage](https://github.com/node-base/base-generators "Adds project-generator support to your `base` application.")
+* [base-scaffold](https://www.npmjs.com/package/base-scaffold): Base plugin that adds support for generating files from a declarative scaffold configuration. | [homepage](https://github.com/node-base/base-scaffold "Base plugin that adds support for generating files from a declarative scaffold configuration.")
+* [base-task](https://www.npmjs.com/package/base-task): base plugin that provides a very thin wrapper around [https://github.com/doowb/composer](https://github.com/doowb/composer) for adding task methods to… [more](https://github.com/node-base/base-task) | [homepage](https://github.com/node-base/base-task "base plugin that provides a very thin wrapper around <https://github.com/doowb/composer> for adding task methods to your application.")
+* [base](https://www.npmjs.com/package/base): base is the foundation for creating modular, unit testable and highly pluggable node.js applications, starting… [more](https://github.com/node-base/base) | [homepage](https://github.com/node-base/base "base is the foundation for creating modular, unit testable and highly pluggable node.js applications, starting with a handful of common methods, like `set`, `get`, `del` and `use`.")
+
+### Contributing
+
+Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
+
+### Building docs
+
+_(This document was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme) (a [verb](https://github.com/verbose/verb) generator), please don't edit the readme directly. Any changes to the readme must be made in [.verb.md](.verb.md).)_
+
+To generate the readme and API documentation with [verb](https://github.com/verbose/verb):
 
 ```sh
-$ npm install verb && npm run docs
+$ npm install -g verb verb-generate-readme && verb
 ```
 
-Or, if [verb](https://github.com/verbose/verb) is installed globally:
-
-```sh
-$ verb
-```
-
-## Running tests
+### Running tests
 
 Install dev dependencies:
 
@@ -162,18 +204,18 @@ Install dev dependencies:
 $ npm install -d && npm test
 ```
 
-## Author
+### Author
 
 **Jon Schlinkert**
 
 * [github/jonschlinkert](https://github.com/jonschlinkert)
 * [twitter/jonschlinkert](http://twitter.com/jonschlinkert)
 
-## License
+### License
 
 Copyright © 2016, [Jon Schlinkert](https://github.com/jonschlinkert).
 Released under the [MIT license](https://github.com/node-base/base-boilerplate/blob/master/LICENSE).
 
 ***
 
-_This file was generated by [verb](https://github.com/verbose/verb), v0.9.0, on May 24, 2016._
+_This file was generated by [verb](https://github.com/verbose/verb), v0.9.0, on July 19, 2016._
