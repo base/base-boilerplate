@@ -11,8 +11,9 @@ var debug = require('debug')('base-boilerplate');
 var utils = require('./utils');
 
 module.exports = function(config) {
-  return function(app) {
+  return function fn(app) {
     if (!utils.isValid(app, 'base-boilerplate')) return;
+    debug('initializing base-boilerplate from <%s>', __filename);
 
     /**
      * Boilerplate cache
@@ -34,26 +35,6 @@ module.exports = function(config) {
      */
 
     this.define({
-
-      /**
-       * Returns true if the given value is a valid `Boilerplate`.
-       *
-       * ```js
-       * app.isBoilerplate('foo');
-       * //=> false
-       *
-       * var Boilerplate = require('boilerplate');
-       * var boilerplate = new Boilerplate();
-       * app.isBoilerplate(boilerplate);
-       * //=> true
-       * ```
-       * @name .isBoilerplate
-       * @param {any} `val`
-       * @return {Boolean}
-       * @api public
-       */
-
-      isBoilerplate: utils.isBoilerplate,
 
       /**
        * Get boilerplate `name` from `app.boilerplates`, or set boilerplate `name` with the given
@@ -81,14 +62,9 @@ module.exports = function(config) {
        */
 
       boilerplate: function(name, config) {
-        if (utils.isObject(name)) {
-          return this.getBoilerplate(name);
-        }
-
         if (!config && typeof name === 'string' || utils.isObject(name)) {
           return this.getBoilerplate(name);
         }
-
         this.setBoilerplate.apply(this, arguments);
         if (typeof name === 'string') {
           return this.getBoilerplate(name);
@@ -195,11 +171,10 @@ module.exports = function(config) {
           this.emit('boilerplate', boilerplate);
           boilerplate.on('scaffold', this.emit.bind(this, 'scaffold'));
           config = boilerplate.expand(config);
-        }
 
-        // otherwise, ensure options are merged onto the boilerplate,
-        // and all targets are emitted
-        else {
+        } else {
+          // otherwise, ensure options are merged onto the boilerplate,
+          // and all targets are emitted
           config.options = utils.merge({}, this.options, config.options, options);
           if (typeof name === 'string') {
             config.name = name;
@@ -219,131 +194,25 @@ module.exports = function(config) {
       },
 
       /**
-       * Asynchronously generate files from a declarative [boilerplate][] configuration.
+       * Returns true if the given value is a valid [Boilerplate][].
        *
        * ```js
-       * var Boilerplate = require('boilerplate');
-       * var boilerplate = new Boilerplate({
-       *   options: {cwd: 'source'},
-       *   posts: {
-       *     src: ['content/*.md']
-       *   },
-       *   pages: {
-       *     src: ['templates/*.hbs']
-       *   }
-       * });
-       *
-       * app.boilerplate(boilerplate, function(err) {
-       *   if (err) console.log(err);
-       * });
+       * isBoilerplate('a');
+       * //=> false
+       * isBoilerplate({});
+       * //=> false
+       * isBoilerplate({ files: [] })
+       * //=> false
+       * isBoilerplate(new Boilerplate({ src: ['*.js'] }))
+       * //=> true
        * ```
-       * @name .boilerplate
-       * @param {Object} `boilerplate` Boilerplate configuration object.
-       * @param {Function} `cb` Optional callback function. If not passed, `.boilerplateStream` is called and a stream is returned.
+       * @name `.isBoilerplate
+       * @param {any} `val`
+       * @return {Boolean}
        * @api public
        */
 
-      boilerplateSeries: function(boilerplate, options, cb) {
-        debug('boilerplateSeries', boilerplate);
-
-        if (typeof options === 'function') {
-          cb = options;
-          options = {};
-        }
-
-        if (typeof cb !== 'function') {
-          return this.boilerplateStream(boilerplate, options);
-        }
-
-        if (!utils.isBoilerplate(boilerplate)) {
-          throw new Error('expected an instance of Boilerplate');
-        }
-
-        this.run(boilerplate);
-        var scaffolds = boilerplate.scaffolds;
-        var targets = boilerplate.targets;
-
-        utils.eachSeries(Object.keys(scaffolds), function(key, next) {
-          var scaffold = scaffolds[key];
-          boilerplate.run(scaffold);
-          app.scaffold(scaffold, options, next);
-        }, function(err) {
-          if (err) {
-            cb(err);
-            return;
-          }
-
-          utils.eachSeries(Object.keys(targets), function(key, next) {
-            var target = targets[key];
-            boilerplate.run(target);
-
-            if (!target.files) {
-              next();
-              return;
-            }
-            app.each(target, options, next);
-          }, cb);
-        });
-      },
-
-      /**
-       * Generate files from a declarative [boilerplate][] configuration and return a stream.
-       *
-       * ```js
-       * var Boilerplate = require('boilerplate');
-       * var boilerplate = new Boilerplate({
-       *   options: {cwd: 'source'},
-       *   posts: {
-       *     src: ['content/*.md']
-       *   },
-       *   pages: {
-       *     src: ['templates/*.hbs']
-       *   }
-       * });
-       *
-       * app.boilerplateStream(boilerplate)
-       *   .on('error', console.error)
-       *   .on('end', function() {
-       *     console.log('done!');
-       *   });
-       * ```
-       * @name .boilerplateStream
-       * @param {Object} `boilerplate` [boilerplate][] configuration object.
-       * @return {Stream} returns a stream with all processed files.
-       * @api public
-       */
-
-      boilerplateStream: function(boilerplate, options) {
-        debug('boilerplateStream', boilerplate);
-
-        if (!utils.isBoilerplate(boilerplate)) {
-          throw new Error('expected an instance of Boilerplate');
-        }
-
-        this.run(boilerplate);
-        var scaffolds = boilerplate.scaffolds;
-        var targets = boilerplate.targets;
-        var streams = [];
-
-        for (var prop in scaffolds) {
-          var scaffold = scaffolds[prop];
-          boilerplate.run(scaffold);
-          streams.push(this.scaffoldStream(scaffold, options));
-        }
-
-        for (var name in targets) {
-          var target = targets[name];
-          boilerplate.run(target);
-
-          if (target.files) {
-            streams.push(this.eachStream(target, options));
-          }
-        }
-
-        var stream = utils.ms.apply(utils.ms, streams);
-        stream.on('finish', stream.emit.bind(stream, 'end'));
-        return stream;
-      },
+      isBoilerplate: utils.isBoilerplate,
 
       /**
        * Get or set the `Boilerplate` constructor. Exposed as a getter/setter to allow it to be
@@ -351,7 +220,7 @@ module.exports = function(config) {
        *
        * ```js
        * // set
-       * app.Boilerplate = CustomBoilerplateFn;
+       * app.Boilerplate = function MyBoilerplateCtor() {};
        *
        * // get
        * var scaffold = new app.Boilerplate();
@@ -373,5 +242,6 @@ module.exports = function(config) {
         }
       }
     });
+    return fn;
   };
 };
