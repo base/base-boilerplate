@@ -92,14 +92,16 @@ module.exports = function(config) {
        */
 
       setBoilerplate: function(name, config) {
+        debug('setBoilerplate', name);
         if (typeof name !== 'string') {
           throw new TypeError('expected the first argument to be a string');
         }
         if (utils.isObject(config)) {
           config.name = name;
         }
-        this.emit('boilerplate.set', name, config);
+
         this.boilerplates[name] = config;
+        this.emit('boilerplate.set', name, config);
         return this;
       },
 
@@ -127,6 +129,7 @@ module.exports = function(config) {
        */
 
       getBoilerplate: function(name, options) {
+        debug('getBoilerplate', name);
         var opts = utils.merge({}, this.options);
         var config;
 
@@ -150,7 +153,7 @@ module.exports = function(config) {
         }
 
         if (typeof config === 'function') {
-          config = config(opts);
+          config = config(utils.merge({}, this.options, options));
         }
 
         if (!utils.isObject(config)) {
@@ -160,7 +163,7 @@ module.exports = function(config) {
         // if `config` is not an instance of Boilerplate, make it one
         if (!this.isBoilerplate(config)) {
           var Boilerplate = this.get('Boilerplate');
-          var boilerplate = new Boilerplate(opts);
+          var boilerplate = new Boilerplate();
           boilerplate.options = utils.merge({}, this.options, boilerplate.options, options);
           if (typeof name === 'string') {
             boilerplate.name = name;
@@ -171,7 +174,6 @@ module.exports = function(config) {
           this.emit('boilerplate', boilerplate);
           boilerplate.on('scaffold', this.emit.bind(this, 'scaffold'));
           config = boilerplate.expand(config);
-
         } else {
           // otherwise, ensure options are merged onto the boilerplate,
           // and all targets are emitted
